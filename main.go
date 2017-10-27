@@ -13,11 +13,11 @@ import (
 var templates = template.Must(template.ParseFiles("index.html", "work_header.html", "work_footer.html"))
 
 func indexHandler(w http.ResponseWriter, req *http.Request) {
-    buffer := &bytes.Buffer{}
-    if err := templates.ExecuteTemplate(buffer, "index.html", nil); err != nil {
+    var buffer = bytes.Buffer{}
+    if err := templates.ExecuteTemplate(&buffer, "index.html", nil); err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     } else {
-        io.Copy(w, buffer)
+        io.Copy(w, &buffer)
     }
 }
 
@@ -28,14 +28,14 @@ func workHandler(w http.ResponseWriter, req *http.Request) {
         flusher = f
     }
 
-    bufferHeader := &bytes.Buffer{}
-    bufferFooter := &bytes.Buffer{}
-    if err := templates.ExecuteTemplate(bufferHeader, "work_header.html", nil); err != nil {
+    var bufferHeader = bytes.Buffer{}
+    var bufferFooter = bytes.Buffer{}
+    if err := templates.ExecuteTemplate(&bufferHeader, "work_header.html", nil); err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
 
-    if err := templates.ExecuteTemplate(bufferFooter, "work_footer.html", nil); err != nil {
+    if err := templates.ExecuteTemplate(&bufferFooter, "work_footer.html", nil); err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
         return
     }
@@ -43,7 +43,7 @@ func workHandler(w http.ResponseWriter, req *http.Request) {
     w.Header().Set("Content-Type", "text/html; charset=utf-8")
     w.WriteHeader(http.StatusOK)
 
-    io.Copy(w, bufferHeader)
+    io.Copy(w, &bufferHeader)
     if flusher != nil {
         flusher.Flush()
     }
@@ -57,7 +57,7 @@ func workHandler(w http.ResponseWriter, req *http.Request) {
             flusher.Flush()
         }
     }
-    io.Copy(w, bufferFooter) 
+    io.Copy(w, &bufferFooter)
     if flusher != nil {
         flusher.Flush()
     }
